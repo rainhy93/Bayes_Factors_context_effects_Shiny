@@ -1,10 +1,17 @@
-# Bayes_Factors_context_effects_Shiny
-a Shiny App for computing Bayes Factors for user-defined context effects
+# Bayes_Factors_context_effects_Shiny  
+
+This github repo contains the code and input data for the Shiny app developed by *rainhy93*.
+
+This interactive tool aims at computing Bayes Factors for user-defined context effects. A detailed description of the original source of the experimental data and analysis approach to obtaining the Bayes Factors can be found at [instructions](http)
 
 To test the app, please download
-a. bfs_all_sub_00_to_33.csv
-b. get_bf_individual.R
-c. app.R
-d. the "www" folder
 
-Put the downloaded files in the same folder and run app.R in RStudio to initiate the app.
+1. bfs_all_sub_00_to_33.csv
+
+2. get_bf_individual.R
+
+3. app.R
+
+4. the "www" folder
+
+Then, put the downloaded files in the same folder and run **app.R** in RStudio to initiate the app.
