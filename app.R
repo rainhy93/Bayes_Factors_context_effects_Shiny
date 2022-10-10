@@ -39,10 +39,13 @@ ui = fluidPage(
               img(src = "attribute map.png", height = 550, width = 700,  
                   style = "display: block; margin-left: auto; margin-right: auto;"),
               tags$br(),
-              actionButton(inputId = "go", label = "Update"),
+              actionButton(inputId = "go", label = "Run Analysis"),
               plotlyOutput("bf_dist"),
               tags$hr(),
-              textOutput("group_bf"))
+              textOutput("group_bf"),
+              # export bfs
+              downloadButton(outputId = "exportBFs", label = "Export Bayes Factors")
+    ),
     
   )
 )
@@ -78,16 +81,27 @@ server = function(input, output){
       bfs = as.data.frame(bfs)
       colnames(bfs) = 'bf'
       bfs = bfs %>%
-        mutate(interpretation = case_when(bf < 1/100 ~ "decisive evidence for null",
-                                          bf >= 1/100 & bf < 1/30 ~ "very strong evidence for null",
-                                          bf >= 1/30 & bf < 1/10 ~ "strong evidence for null",
-                                          bf >= 1/10 & bf < 1/3 ~ "substantial evidence for null",
-                                          bf >= 1/3 & bf < 1 ~ "anecdotal evidence for null",
+        mutate(interpretation = case_when(bf < 1/100 ~ "decisive evidence for unconstrained",
+                                          bf >= 1/100 & bf < 1/30 ~ "very strong evidence for unconstrained",
+                                          bf >= 1/30 & bf < 1/10 ~ "strong evidence for unconstrained",
+                                          bf >= 1/10 & bf < 1/3 ~ "substantial evidence for unconstrained",
+                                          bf >= 1/3 & bf < 1 ~ "anecdotal evidence for unconstrained",
                                           bf >= 1 & bf < 3 ~ "anecdotal evidence for constrained",
                                           bf >= 3 & bf < 10 ~ "substantial evidence for constrained",
                                           bf >= 10 & bf < 30 ~ "strong evidence for constrained",
                                           bf >= 30 & bf < 100 ~ "very strong evidence for constrained",
                                           bf >= 100 ~ "decisive evidence for constrained"))
+      
+      bfs$interpretation = factor(bfs$interpretation, levels = c("decisive evidence for unconstrained", 
+                                                                 "very strong evidence for unconstrained",
+                                                                 "strong evidence for unconstrained",
+                                                                 "substantial evidence for unconstrained",
+                                                                 "anecdotal evidence for unconstrained",
+                                                                 "anecdotal evidence for constrained",
+                                                                 "substantial evidence for constrained",
+                                                                 "strong evidence for constrained",
+                                                                 "very strong evidence for constrained",
+                                                                 "decisive evidence for constrained"))
       
       bfs
     })
@@ -96,7 +110,7 @@ server = function(input, output){
     output$bf_dist = renderPlotly({
       
     p = results() %>% count(interpretation) %>%
-        ggplot(aes(x = reorder(interpretation, n), y = n)) + 
+        ggplot(aes(x = interpretation, y = n)) + 
         geom_col(fill = "navy") + 
         coord_flip() +
         labs(x = "Bayes Factor Interpretation", y = "Count")
@@ -111,6 +125,16 @@ server = function(input, output){
       paste("The Group Bayes Factor across all subjects is", exp(sum(log(results()$bf))))
 
     )
+    
+    output$exportBFs = downloadHandler(
+      filename = function() {
+             paste('bayes_factors', Sys.Date(), '.csv', sep='')
+           },
+      content = function(con) {
+             write.csv(results()$bf, con)
+           }
+    )
+    
   
 }
 
