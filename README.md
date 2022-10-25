@@ -6,7 +6,7 @@ This interactive tool aims at computing Bayes Factors for user-defined context e
 
 To test the app, please download
 
-1. bfs_all_sub_00_to_33.csv
+1. results_00_to_90.csv
 
 2. get_bf_individual.R
 
