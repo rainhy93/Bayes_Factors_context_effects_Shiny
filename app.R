@@ -6,7 +6,6 @@ library(readr)
 
 source("get_bf_individual.R")
 
-
 bfs_all_sub_00_to_90 <- read_csv("results_00_to_90.csv")
 
 subjects = bfs_all_sub_00_to_90 %>% select(Subject) %>% distinct(.) %>% pull(-1)
@@ -70,6 +69,7 @@ ui = fluidPage(
       actionButton(inputId = "go", label = "Run Analysis"),
       plotlyOutput("bf_dist"),
       tags$hr(),
+      textOutput("max_bf"),
       textOutput("group_bf"),
       # export bfs
       downloadButton(outputId = "exportBFs", label = "Export Bayes Factors")
@@ -120,13 +120,13 @@ server = function(input, output) {
     })
   })
   
-  error_val_pref = eventReactive(input$go, {
-    as.numeric(input$error_pref)
-  })
-  
-  error_val_indiff = eventReactive(input$go, {
-    as.numeric(input$error_indiff)
-  })
+  # error_val_pref = eventReactive(input$go, {
+  #   as.numeric(input$error_pref)
+  # })
+  # 
+  # error_val_indiff = eventReactive(input$go, {
+  #   as.numeric(input$error_indiff)
+  # })
   
   
   
@@ -140,8 +140,8 @@ server = function(input, output) {
       bins_indiff = bins_indiff(),
       bins_pref_a = bins_a(),
       bins_pref_b = bins_b(),
-      tau_value_indiff = 2 * error_val_indiff(),
-      tau_value_pref = 1 - 2 * error_val_pref()
+      tau_value_indiff = 2*as.numeric(input$error_indiff),
+      tau_value_pref = 1-2*as.numeric(input$error_pref)
     )
     
     bfs = as.data.frame(bfs)
@@ -149,57 +149,59 @@ server = function(input, output) {
     bfs = bfs %>%
       mutate(
         interpretation = case_when(
-          bf < 1 / 100 ~ "decisive evidence for unconstrained",
+          bf < 1 / 100 ~ "decisive evidence for unconstrained (-inf, 1/100)",
           bf >= 1 / 100 &
-            bf < 1 / 30 ~ "very strong evidence for unconstrained",
+            bf < 1 / 30 ~ "very strong evidence for unconstrained [1/100, 1/30)",
           bf >= 1 / 30 &
-            bf < 1 / 10 ~ "strong evidence for unconstrained",
+            bf < 1 / 10 ~ "strong evidence for unconstrained [1/30, 1/10)",
           bf >= 1 / 10 &
-            bf < 1 / 3 ~ "substantial evidence for unconstrained",
+            bf < 1 / 3 ~ "substantial evidence for unconstrained [1/10, 1/3)",
           bf >= 1 / 3 &
-            bf < 1 ~ "anecdotal evidence for unconstrained",
+            bf < 1 ~ "anecdotal evidence for unconstrained [1/3, 1)",
           bf >= 1 &
-            bf < 3 ~ "anecdotal evidence for constrained",
+            bf < 3 ~ "anecdotal evidence for constrained [1, 3)",
           bf >= 3 &
-            bf < 10 ~ "substantial evidence for constrained",
+            bf < 10 ~ "substantial evidence for constrained [3, 10)",
           bf >= 10 &
-            bf < 30 ~ "strong evidence for constrained",
+            bf < 30 ~ "strong evidence for constrained [10, 30)",
           bf >= 30 &
-            bf < 100 ~ "very strong evidence for constrained",
-          bf >= 100 ~ "decisive evidence for constrained"
+            bf < 100 ~ "very strong evidence for constrained [30, 100)",
+          bf >= 100 ~ "decisive evidence for constrained [100, inf)"
         )
       )
     
     bfs$interpretation = factor(
       bfs$interpretation,
       levels = c(
-        "decisive evidence for unconstrained",
-        "very strong evidence for unconstrained",
-        "strong evidence for unconstrained",
-        "substantial evidence for unconstrained",
-        "anecdotal evidence for unconstrained",
-        "anecdotal evidence for constrained",
-        "substantial evidence for constrained",
-        "strong evidence for constrained",
-        "very strong evidence for constrained",
-        "decisive evidence for constrained"
+        "decisive evidence for unconstrained (-inf, 1/100)",
+        "very strong evidence for unconstrained [1/100, 1/30)",
+        "strong evidence for unconstrained [1/30, 1/10)",
+        "substantial evidence for unconstrained [1/10, 1/3)",
+        "anecdotal evidence for unconstrained [1/3, 1)",
+        "anecdotal evidence for constrained [1, 3)",
+        "substantial evidence for constrained [3, 10)",
+        "strong evidence for constrained [10, 30)",
+        "very strong evidence for constrained [30, 100)",
+        "decisive evidence for constrained [100, inf)"
       )
     )
     
     bfs
   })
   
-  
   output$bf_dist = renderPlotly({
     p = results() %>% count(interpretation) %>%
       ggplot(aes(x = interpretation, y = n)) +
       geom_col(fill = "navy") +
       coord_flip() +
-      labs(x = "Bayes Factor Interpretation", y = "Count")
+      labs(x = "Bayes Factor & Interpretation", y = "Count")
     
     ggplotly(p, tooltip = "y")
     
   })
+  
+  #output$max_bf = renderText(paste("The maximum possible Bayes Factor for your specified constraints
+  #                                for one subject is", ))
   
   
   output$group_bf = renderText(paste("The Group Bayes Factor across all subjects is", exp(sum(log(
