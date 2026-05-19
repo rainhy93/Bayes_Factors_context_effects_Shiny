@@ -5,9 +5,7 @@ account: huangyu
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 7667529
-bundleId: 6867209
+bundleId: 12010688
 url: https://huangyu.shinyapps.io/Context-effects-Bayes-factors/
-when: 1676915445.19436
-lastSyncTime: 1676915445.19436
 asMultiple: FALSE
 asStatic: FALSE
