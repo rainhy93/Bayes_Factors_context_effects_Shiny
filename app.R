@@ -13,6 +13,8 @@ subjects = bfs_all_sub_00_to_90 %>% select(Subject) %>% distinct(.) %>% pull(-1)
 
 
 ui = fluidPage(
+  
+  
   titlePanel("Bayes Factors for Your Context Effects Specification"),
   
   sidebarLayout(
@@ -60,9 +62,9 @@ ui = fluidPage(
     mainPanel(
       h3("Attribute Map", align = "left"),
       img(
-        src = "attribute map.png",
+        src = "attribute map v2.png",
         height = 550,
-        width = 700,
+        width = 550,
         style = "display: block; margin-left: auto; margin-right: auto;"
       ),
       tags$br(),

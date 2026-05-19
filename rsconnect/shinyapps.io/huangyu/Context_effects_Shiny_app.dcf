@@ -1,0 +1,12 @@
+name: Context_effects_Shiny_app
+title: Context_effects_Shiny_app
+username: huangyu
+account: huangyu
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 17382681
+bundleId: 12010628
+url: https://huangyu.shinyapps.io/Context_effects_Shiny_app/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE
